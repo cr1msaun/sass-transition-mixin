@@ -1,0 +1,42 @@
+@function str-split($string, $separator) 
+  $split-arr: ()
+  $index : str-index($string, $separator)
+
+  @while $index != null
+    $item: str-slice($string, 1, $index - 1)
+    $split-arr: append($split-arr, $item)
+    $string: str-slice($string, $index + 1)
+    $index : str-index($string, $separator)
+
+  $split-arr: append($split-arr, $string)
+
+  @return $split-arr
+
+@function parse-transition-property($property)
+  @if length($property) == 0
+    @return all $transition-speed-default
+  
+  $propertyValues: str-split(inspect($property), ' ')
+  $length: length($propertyValues)
+  
+  $transition-property: nth($propertyValues, 1)
+  $transition-duration: $transition-speed-default
+
+  @if $length == 2
+    $transition-duration: nth($propertyValues, 2)
+  
+  @return $transition-property $transition-duration
+
+=transition($properties...)
+  $transitions: ()
+  $length: length($properties)
+  
+  @if $length <= 1
+    $transitions: append($transitions, parse-transition-property($properties))
+  
+  @if $length >= 2
+    @for $i from 1 through length($properties)
+      $prop: nth($properties, $i)
+      $transitions: append($transitions, parse-transition-property($prop))
+  
+  transition: join($transitions, (), comma)
